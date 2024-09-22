@@ -15,7 +15,7 @@ namespace WebShopAPI.Models
         public string ShortDescription { get; set; }
         public string LongDescription { get; set; }
         public int StatusProduct { get; set; }
-        public ProductItemModel ProductItems { get; set; }
+        public List<ProductItemModel> ProductItems { get; set; }
 
         [Required(ErrorMessage = "File img not null!!")]
         [DisplayName("Product img")]
