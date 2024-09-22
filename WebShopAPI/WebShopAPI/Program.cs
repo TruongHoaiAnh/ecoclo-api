@@ -109,6 +109,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IAccountRepo, AccountRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
+builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
 
 
 var app = builder.Build();

@@ -77,6 +77,7 @@ namespace WebShopAPI.Repositories
                 var authClaim = new List<Claim>
                 {
                     new Claim(ClaimTypes.Email, userByName.Email),
+                    new Claim(ClaimTypes.NameIdentifier, userByName.Id), // Add user ID here
                     new Claim(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 };
                 foreach (var role in userRoles)

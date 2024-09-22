@@ -51,7 +51,7 @@ namespace WebShopAPI.Repositories
                 };
             }
 
-            if (model.ProductItems == null/* || !model.ProductItems.Any()*/)
+            if (model.ProductItems == null || !model.ProductItems.Any())
             {
                 return new ApiResponse
                 {
@@ -74,22 +74,22 @@ namespace WebShopAPI.Repositories
                     ShortDescription = model.ShortDescription,
                     LongDescription = model.LongDescription,
                     CreateDate = DateTime.Now,
-                    StatusProduct = 1, 
+                    StatusProduct = 0, 
                 };
 
                 await _context.products.AddAsync(product);
-                var productItem = new ProductItem
-                {
-                    IdPro = idPro,
-                    IdProItem = GenerateNextProductItemsId(),
-                    Size = model.ProductItems.Size,
-                    Color = model.ProductItems.Color,
-                    Quantity = model.ProductItems.Quantity,
-                    StatusProItem = 1
-                };
-                await _context.productItems.AddAsync(productItem);
+                /* var productItem = new ProductItem
+                 {
+                     IdPro = idPro,
+                     IdProItem = GenerateNextProductItemsId(),
+                     Size = model.ProductItems.Size,
+                     Color = model.ProductItems.Color,
+                     Quantity = model.ProductItems.Quantity,
+                     StatusProItem = 0
+                 };
+                 await _context.productItems.AddAsync(productItem);*/
 
-               /* foreach (var proItemModel in model.ProductItems)
+                foreach (var proItemModel in model.ProductItems)
                 {
                     var productItem = new ProductItem
                     {
@@ -98,10 +98,10 @@ namespace WebShopAPI.Repositories
                         Size = proItemModel.Size,
                         Color = proItemModel.Color,
                         Quantity = proItemModel.Quantity,
-                        StatusProItem = 1
+                        StatusProItem = 0
                     };
                     await _context.productItems.AddAsync(productItem);
-                }*/
+                }
 
                 foreach (var imgFile in model.ImgFiles)
                 {
@@ -153,7 +153,7 @@ namespace WebShopAPI.Repositories
         public async Task<List<Product>> GetAll(string? searchString, string? IdCate, float? from, float? to)
         {
             var lsProduct = _context.products.AsNoTracking()
-                .Where(x => x.StatusProduct == 1).AsQueryable();
+                .Where(x => x.StatusProduct == 0).AsQueryable();
             if (!string.IsNullOrEmpty(searchString))
             {
                 searchString = searchString.ToLower();
@@ -209,11 +209,11 @@ namespace WebShopAPI.Repositories
                     Message = "Product is not found"
                 };
             }
-            product.StatusProduct = 0; // Đã xóa
+            product.StatusProduct = 1; // Đã xóa
             _context.Update(product);
             foreach (var pi in product.ProductItems)
             {
-                pi.StatusProItem = 0;
+                pi.StatusProItem = 1;
                 _context.Update(pi);
             }
             foreach (var img in product.ImgPros)

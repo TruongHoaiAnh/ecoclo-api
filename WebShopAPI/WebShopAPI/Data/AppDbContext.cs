@@ -66,11 +66,11 @@ namespace WebShopAPI.Data
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_wishlist_product");
             modelBuilder.Entity<Wishlist>()
-            .HasOne(d => d.user)
-               .WithMany(p => p.Wishlists)
-               .HasForeignKey(d => d.IdPro)
-               .OnDelete(DeleteBehavior.ClientSetNull)
-               .HasConstraintName("FK_wishlist_Users");
+                .HasOne(d => d.user)
+                .WithMany(p => p.Wishlists)
+                .HasForeignKey(d => d.IdAcc)  
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_wishlist_Users");
             //Category
             modelBuilder.Entity<Product>()
             .HasOne(e => e.Category)
