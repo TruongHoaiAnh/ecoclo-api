@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebShopAPI.Data;
+using WebShopAPI.Dtos;
 using WebShopAPI.Helpers;
 using WebShopAPI.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebShopAPI.Repositories
 {
@@ -148,37 +150,48 @@ namespace WebShopAPI.Repositories
             }
 
         }
-
-
-        public async Task<List<Product>> GetAll(string? searchString, string? IdCate, float? from, float? to)
+        public async Task<List<ProductDto>> GetAll(string? searchString, string? IdCate, float? from, float? to)
         {
-            var lsProduct = _context.products.AsNoTracking()
-                .Where(x => x.StatusProduct == 0).AsQueryable();
+            var query = _context.products.AsQueryable();
+
+            // Apply filters
             if (!string.IsNullOrEmpty(searchString))
             {
                 searchString = searchString.ToLower();
-                lsProduct = lsProduct.Where(x => x.Name.ToLower().Contains(searchString));
+                query = query.Where(x => x.Name.ToLower().Contains(searchString));
             }
-            if (!string.IsNullOrEmpty(IdCate)) 
+
+            if (!string.IsNullOrEmpty(IdCate))
             {
-                lsProduct = lsProduct.Where(x => x.IdCate == IdCate);
+                query = query.Where(x => x.IdCate == IdCate);
             }
+
             if (from.HasValue)
             {
-                lsProduct = lsProduct.Where(x => x.Price >= from);
+                query = query.Where(x => x.Price >= from);
             }
+
             if (to.HasValue)
             {
-                lsProduct = lsProduct.Where(x => x.Price <= to);
+                query = query.Where(x => x.Price <= to);
             }
-            var result = await lsProduct.OrderByDescending(p => p.UpdateDate != null ? p.UpdateDate : p.CreateDate).ToListAsync();
 
-            return result;
+            // Include related entities and convert to DTOs
+            var products = await query
+                .Include(p => p.ProductItems)
+                .Include(p => p.ImgPros)
+                .ToListAsync();
+
+            // Use AutoMapper to convert to DTOs
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
+
+            return productDtos;
         }
-     
 
 
-     
+
+
+
         public Task Update(ProductModel model, string id)
         {
             throw new NotImplementedException();
@@ -233,6 +246,21 @@ namespace WebShopAPI.Repositories
                 Success = true,
                 Message = "Delete Product successfully"
             };
+        }
+
+        public async Task<ProductDto> ProductDetai(string idPro)
+        {
+            var product = await _context.products
+                .Include(p => p.ProductItems)
+                .Include(p => p.ImgPros)
+                .FirstOrDefaultAsync(p => p.IdPro == idPro);
+
+            if (product == null)
+            {
+                return null;
+            }
+
+            return _mapper.Map<ProductDto>(product);
         }
 
         public string GenerateNextProductId()

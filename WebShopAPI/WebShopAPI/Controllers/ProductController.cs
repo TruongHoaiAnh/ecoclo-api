@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PagedList;
 using WebShopAPI.Data;
+using WebShopAPI.Dtos;
 using WebShopAPI.Helpers;
 using WebShopAPI.Models;
 using WebShopAPI.Repositories;
@@ -21,15 +22,15 @@ namespace WebShopAPI.Controllers
             _productRepo = productRepo;
         }
         [HttpGet]
-        public async Task<IActionResult> Get(int? page, string? searchString, string? IdCate, float? from, float? to)
+        public async Task<IActionResult> GetAll(int? page, string? searchString, string? IdCate, float? from, float? to)
         {
-            List<Product> lsProduct = new List<Product>();
+            List<ProductDto> lsProduct = new List<ProductDto>();
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var pageSize = 5;
             try
             {
                 lsProduct = await _productRepo.GetAll(searchString, IdCate, from, to);
-                PagedList<Product> models = new PagedList<Product>(lsProduct.AsQueryable(), pageNumber, pageSize);
+                PagedList<ProductDto> models = new PagedList<ProductDto>(lsProduct.AsQueryable(), pageNumber, pageSize);
                 return Ok(models);
             }
             catch (Exception ex)
@@ -38,10 +39,17 @@ namespace WebShopAPI.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public string Get(string id)
+        [HttpGet("{idPro}")]
+        public async Task<IActionResult> GetDetail(string idPro)
         {
-            return "value";
+            var productDetail = await _productRepo.ProductDetai(idPro);
+
+            if (productDetail == null)
+            {
+                return NotFound(new ApiResponse { Success = false, Message = "ProducDetail not found"}); 
+            }
+
+            return Ok(productDetail);
         }
 
         [HttpPost]
