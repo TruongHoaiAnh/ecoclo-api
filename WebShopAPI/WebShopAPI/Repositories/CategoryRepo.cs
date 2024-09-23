@@ -26,6 +26,7 @@ namespace WebShopAPI.Repositories
             var cate = new Category();
             cate.IdCate = GenerateNextCateId(); ;
             cate.NameCate = model.NameCate;
+            cate.StatusCate = 0;
             _context.categories.Add(cate);
             await _context.SaveChangesAsync();
 
@@ -45,20 +46,22 @@ namespace WebShopAPI.Repositories
             foreach(var p in cate.Products)
             {
                 p.StatusProduct = 1;
-            }    
-            _context.categories.Remove(cate);
+            }
+            cate.StatusCate = 1;
             await _context.SaveChangesAsync();
         }
 
         public async Task<List<Category>> GetAll()
         {
-            var lsCate = await _context.categories.ToListAsync();
+            var lsCate = await _context.categories.Where(x => x.StatusCate == 0).ToListAsync();
             return lsCate;
         }
 
         public async Task<Category> GetById(string id)
         {
-            var cate = await _context.categories.FindAsync(id);
+            var cate = await _context.categories
+               .Where(x => x.StatusCate == 0 && x.IdCate == id) // Add the condition to filter by Id
+               .FirstOrDefaultAsync();
             return cate;
         }
 

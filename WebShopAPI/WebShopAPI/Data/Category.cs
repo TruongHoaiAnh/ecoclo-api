@@ -8,6 +8,7 @@ namespace WebShopAPI.Data
         public string IdCate { get; set; }
         [Required]
         public string NameCate { get; set; }
+        public int StatusCate { get; set; }
         public virtual ICollection<Product> Products { get; set; }
     }
 }

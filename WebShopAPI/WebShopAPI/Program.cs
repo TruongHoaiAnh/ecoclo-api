@@ -117,6 +117,7 @@ builder.Services.AddScoped<IAccountRepo, AccountRepo>();
 builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
+builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 
 
 var app = builder.Build();

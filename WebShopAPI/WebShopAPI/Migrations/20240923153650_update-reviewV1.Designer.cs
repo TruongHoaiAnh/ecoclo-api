@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebShopAPI.Data;
 
@@ -11,9 +12,11 @@ using WebShopAPI.Data;
 namespace WebShopAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240923153650_update-reviewV1")]
+    partial class updatereviewV1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,9 +253,6 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StatusCate")
-                        .HasColumnType("int");
-
                     b.HasKey("IdCate");
 
                     b.ToTable("categories");
@@ -360,9 +360,6 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("Dislike")
-                        .HasColumnType("int");
-
                     b.Property<string>("IdAcc")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -371,11 +368,8 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("Like")
-                        .HasColumnType("int");
-
-                    b.Property<int>("RatingValue")
-                        .HasColumnType("int");
+                    b.Property<double>("RatingValue")
+                        .HasColumnType("float");
 
                     b.Property<DateTime?>("ReviewDate")
                         .HasColumnType("datetime2");
