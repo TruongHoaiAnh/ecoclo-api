@@ -13,9 +13,14 @@ namespace WebShopAPI.Data
         [ForeignKey(nameof(IdPro))]
         public string IdPro { get; set; }
         [Required]
-        public double RatingValue { get; set; }
-        public string? Comment { get; set; }
+        public int RatingValue { get; set; }
+        [Required]
+        public string Comment { get; set; }
         public DateTime? ReviewDate { get; set; }
+        public int? Like { get; set; }
+        public int? Dislike { get; set; }
+
+        public int statusReview {  get; set; }
         public virtual AppUser user { get; set; }
         public virtual Product product { get; set; }
     }

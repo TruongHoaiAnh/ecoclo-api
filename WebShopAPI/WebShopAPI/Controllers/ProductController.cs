@@ -26,7 +26,7 @@ namespace WebShopAPI.Controllers
         {
             List<ProductDto> lsProduct = new List<ProductDto>();
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
-            var pageSize = 5;
+            var pageSize = 8;
             try
             {
                 lsProduct = await _productRepo.GetAll(searchString, IdCate, from, to);
