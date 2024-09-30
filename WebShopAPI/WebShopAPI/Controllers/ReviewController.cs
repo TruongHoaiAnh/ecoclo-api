@@ -28,14 +28,14 @@ namespace WebShopAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll(int? page)
         {
-            List<Review> lsReview = new List<Review>();
+            List<ReviewDto> lsReview = new List<ReviewDto>();
             var pageNumber = page == null || page <= 0 ? 1 : page.Value;
             var pageSize = 5;
 
             try
             {
                 lsReview = await _reviewRepo.GetAllReview();
-                PagedList<Review> models = new PagedList<Review>(lsReview.AsQueryable(), pageNumber, pageSize);
+                PagedList<ReviewDto> models = new PagedList<ReviewDto>(lsReview.AsQueryable(), pageNumber, pageSize);
                 return Ok(models);
             }
             catch (Exception ex)
@@ -63,6 +63,19 @@ namespace WebShopAPI.Controllers
         public async Task<IActionResult> Delete(string idReview)
         {
             var result = await _reviewRepo.DeleteReview(idReview);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+        }
+
+        [HttpPut("{idReview}")]
+        [Authorize(Roles = AppRole.User)]
+        public async Task<IActionResult> UpdateLike(bool isLike, string idReview)
+        {
+            var result = await _reviewRepo.UpdateReview(isLike, idReview);
             if (result.Success)
             {
                 return Ok(result);

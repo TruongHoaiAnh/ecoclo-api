@@ -5,6 +5,7 @@ namespace WebShopAPI.Dtos
         public class ProductDto
         {
             public string IdPro { get; set; }
+            public string IdCate { get; set; }
             public string Name { get; set; }
             public float Price { get; set; }
             public string ShortDescription { get; set; }

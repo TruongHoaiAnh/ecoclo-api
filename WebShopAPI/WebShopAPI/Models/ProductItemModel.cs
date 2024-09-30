@@ -12,8 +12,5 @@ namespace WebShopAPI.Models
         [Required]
         public int Quantity { get; set; }
 
-        [Required]
-        public int StatusProItem { get; set; }
-
     }
 }

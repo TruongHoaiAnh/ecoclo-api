@@ -39,10 +39,11 @@ namespace WebShopAPI.Controllers
             }
         }
 
+        //Get product detail to show and edit
         [HttpGet("{idPro}")]
-        public async Task<IActionResult> GetDetail(string idPro)
+        public async Task<IActionResult> GetById(string idPro)
         {
-            var productDetail = await _productRepo.ProductDetai(idPro);
+            var productDetail = await _productRepo.GetById(idPro);
 
             if (productDetail == null)
             {
@@ -71,9 +72,28 @@ namespace WebShopAPI.Controllers
             return BadRequest(result);
         }
 
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpPut("{idPro}")]
+        [Authorize(Roles = AppRole.Administrator)]
+        public async Task<IActionResult> Put(string idPro, [FromForm] ProductModel model)
         {
+            if (idPro == null)
+            {
+                return NotFound();
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _productRepo.Update(idPro, model);
+
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+
+            return BadRequest(result);
+
         }
 
         [HttpDelete("{id}")]

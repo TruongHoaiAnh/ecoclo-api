@@ -4,7 +4,7 @@ using WebShopAPI.Data;
 
 namespace WebShopAPI.Models
 {
-    public class ProductModel
+    public class ProductModel 
     {
         public string IdCate { get; set; }
         [Required]
@@ -14,7 +14,6 @@ namespace WebShopAPI.Models
         [Required]
         public string ShortDescription { get; set; }
         public string LongDescription { get; set; }
-        public int StatusProduct { get; set; }
         public List<ProductItemModel> ProductItems { get; set; }
 
         [Required(ErrorMessage = "File img not null!!")]

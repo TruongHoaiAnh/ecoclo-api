@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using WebShopAPI.Data;
+using WebShopAPI.Dtos;
 using WebShopAPI.Helpers;
 using WebShopAPI.Models;
 
@@ -9,14 +11,18 @@ namespace WebShopAPI.Repositories
     public class ReviewRepo : IReviewRepo
     {
         private readonly AppDbContext _context;
+        private readonly UserManager<AppUser> _usermanager;
+        private readonly IMapper _mapper;
 
-        public ReviewRepo(AppDbContext context, IWebHostEnvironment environment)
+        public ReviewRepo(AppDbContext context, UserManager<AppUser> userManager, IMapper mapper)
         {
             _context = context;
+            _usermanager = userManager;
+            _mapper = mapper;
         }
         public async Task<ApiResponse> DeleteReview(string idReview)
         {
-            var findReivew = await _context.reviews.FindAsync(idReview);
+            var findReivew = await _context.reviews.Where(x => x.statusReview == 0).FirstOrDefaultAsync(x => x.IdReview == idReview);
             if (findReivew == null)
             {
                 return new ApiResponse
@@ -84,10 +90,29 @@ namespace WebShopAPI.Repositories
             }
         }
 
-        public async Task<List<Review>> GetAllReview()
+        public async Task<List<ReviewDto>> GetAllReview()
         {
-            var lsReview = await _context.reviews.Where(x => x.statusReview == 0).OrderByDescending(x => x.Like).ToListAsync();
-            return lsReview;
+            var quantity = _context.reviews.Where(x => x.statusReview == 0).Count();
+            var lsReview = await _context.reviews
+               .Where(x => x.statusReview == 0)
+               .Include(r => r.user) 
+               .OrderByDescending(x => x.Like)
+               .ToListAsync();
+            var lsReviewDto = lsReview.Select(r =>
+            {
+                var reviewDto = new ReviewDto
+                {
+                    Username = r.user.FullName, 
+                    QuantityAll = quantity 
+                };
+
+                // Sử dụng mapper để ánh xạ các thuộc tính còn lại
+                _mapper.Map(r, reviewDto);
+
+                return reviewDto;
+            }).ToList();
+
+            return lsReviewDto;
         }
 
         public string GenerateNextReviewId()
@@ -112,6 +137,50 @@ namespace WebShopAPI.Repositories
             string nextIdPro = $"RV{nextNumber:D3}"; // Format the new Id_pro
 
             return nextIdPro;
+        }
+
+        //update like or dislike
+        public async Task<ApiResponse> UpdateReview(bool isLike, string idReview)
+        {
+            var review = await _context.reviews.Where(x => x.statusReview == 0).FirstOrDefaultAsync(x => x.IdReview == idReview);
+            if (review == null)
+            {
+                return new ApiResponse
+                {
+                    Success = false,
+                    ErrorCode = "RIVIEW_NOTFOUND",
+                };
+            }
+            if (isLike)
+            {
+                if(!review.Like.HasValue || review.Like == null)
+                {
+                    review.Like = 1;
+                }
+                else
+                {
+                    review.Like += 1;
+                }
+            }
+            else
+            {
+                if (!review.Dislike.HasValue || review.Dislike == null)
+                {
+                    review.Dislike = 1;
+                }
+                else
+                {
+                    review.Dislike += 1;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+
+            return new ApiResponse
+            {
+                Success = true,
+                Message = "Review updated successfully."
+            };
         }
     }
 }
