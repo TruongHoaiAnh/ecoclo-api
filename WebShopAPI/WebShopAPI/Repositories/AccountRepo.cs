@@ -155,6 +155,7 @@ namespace WebShopAPI.Repositories
                 Email = model.Email,
                 UserName = model.UserName,
                 PhoneNumber = model.Phone,
+                Avt = "default-avatar.png",
                 Status = 0,
             };
 
@@ -199,7 +200,7 @@ namespace WebShopAPI.Repositories
                 }
 
                 // Tạo mã đặt lại mật khẩu (reset token)
-                var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                var code = await userManager.GeneratePasswordResetTokenAsync(user); 
                 code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
 
                 // Tạo URL đặt lại mật khẩu (được gửi qua email)

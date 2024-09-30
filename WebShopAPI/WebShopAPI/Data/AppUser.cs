@@ -14,6 +14,9 @@ namespace WebShopAPI.Data
         public string? Address { get; set; }
 
         public int? Gender { get; set; }
+        [Column(TypeName = "nvarchar")]
+        [StringLength(400)]
+        public string Avt { get; set; }
         public int Status { get; set; }
 
         public virtual ICollection<Review> Reviews { get; set; }
