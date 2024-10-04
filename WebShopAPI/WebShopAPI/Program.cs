@@ -54,7 +54,8 @@ builder.Services.AddSwaggerGen(option =>
 //Auto Mapper
 builder.Services.AddAutoMapper(typeof(Program));
 
-        
+builder.Services.AddHttpContextAccessor(); // Register IHttpContextAccessor
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -129,6 +130,7 @@ builder.Services.AddScoped<IProductRepo, ProductRepo>();
 builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
 builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
+builder.Services.AddScoped<IShoppingCartRepo, WebShopAPI.Repositories.ShoppingCartRepo>();
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 
