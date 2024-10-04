@@ -102,9 +102,9 @@ namespace WebShopAPI.Data
 
             //Shopping cart
             modelBuilder.Entity<ShoppingCart>()
-            .HasOne(e => e.User)
+                .HasOne(e => e.User)
                .WithMany(c => c.ShoppingCarts)
-               .HasForeignKey(d => d.IdCart)
+               .HasForeignKey(d => d.IdAcc)
                .OnDelete(DeleteBehavior.ClientSetNull)
                .HasConstraintName("FK_shopping_cart_user");
 
