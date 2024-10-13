@@ -16,6 +16,10 @@ namespace WebShopAPI.Data
         public DbSet<Category> categories { get; set; }
         public DbSet<ShoppingCart> shoppingCarts { get; set; }
         public DbSet<ShoppingCartItem> shoppingCartItems { get; set; }
+        public DbSet<Banner> banners { get; set; }
+        public DbSet<Order> orders { get; set; }
+        public DbSet<OrderDetail> orderDetails { get; set; }
+        public DbSet<Discount> discounts { get; set; }
 
 
 
@@ -108,11 +112,34 @@ namespace WebShopAPI.Data
                .OnDelete(DeleteBehavior.ClientSetNull)
                .HasConstraintName("FK_shopping_cart_user");
 
-           
+			//Order
+			modelBuilder.Entity<Order>()
+				.HasOne(e => e.User)
+			   .WithMany(c => c.Orders)
+			   .HasForeignKey(d => d.IdAcc)
+			   .OnDelete(DeleteBehavior.ClientSetNull)
+			   .HasConstraintName("FK_order_user");
+            //OrderDetail
+            modelBuilder.Entity<OrderDetail>(entity =>
+            {
+                entity.HasOne<Order>()
+                    .WithMany(p => p.OrderDetails)
+					.HasForeignKey(d => d.IdOrder)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_order_detail_order");
+                entity.HasOne<ProductItem>()
+					.WithMany(p => p.OrderDetails)
+					.HasForeignKey(d => d.IdProItem)
+					.OnDelete(DeleteBehavior.ClientSetNull)
+					.HasConstraintName("FK_order_detail_product_item");
+            });
 
 
 
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+
+
+
+			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 var tableName = entityType.GetTableName();
                 if (tableName.StartsWith("AspNet"))

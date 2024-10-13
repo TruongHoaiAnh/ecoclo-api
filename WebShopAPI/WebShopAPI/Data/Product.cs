@@ -16,6 +16,7 @@ namespace WebShopAPI.Data
         public string LongDescription { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? UpdateDate { get; set; }
+        public string ThumbnailImg { get; set; }
         public int? BestSeller { get; set; }
         [Required]
         public int StatusProduct { get; set; }

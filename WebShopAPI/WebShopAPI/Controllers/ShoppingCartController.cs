@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using WebShopAPI.Helpers;
 using WebShopAPI.Repositories;
 
 namespace WebShopAPI.Controllers
@@ -14,6 +16,7 @@ namespace WebShopAPI.Controllers
         {
             _shoppingCart = shoppingCart;
         }
+
         [HttpGet]
         public async Task<IActionResult> GetListCartItem()
         {
@@ -45,10 +48,10 @@ namespace WebShopAPI.Controllers
             }
             return BadRequest(result);
         }
-        [HttpDelete("{idProItem}")]
-        public async Task<IActionResult> Remove(string idProItem)
+        [HttpDelete("{idCartItem}")]
+        public async Task<IActionResult> Remove(string idCartItem)
         {
-            var result = await _shoppingCart.RemoveFromCart(idProItem);
+            var result = await _shoppingCart.RemoveFromCart(idCartItem);
             if (result.Success)
             {
                 return Ok(result);
