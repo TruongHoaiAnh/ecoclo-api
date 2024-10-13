@@ -62,7 +62,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 //Cho phép các nguồn tài nguyên khác truy cập vào api
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy => policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
-
+// Thêm dịch vụ Session
+builder.Services.AddSession(options =>
+{
+	options.IdleTimeout = TimeSpan.FromMinutes(30); // Thay đổi thời gian tùy ý
+	options.Cookie.HttpOnly = true; // Bảo mật cookie
+	options.Cookie.IsEssential = true; // Cần thiết cho ứng dụng
+});
+// Cấu hình In-Memory Cache
+builder.Services.AddDistributedMemoryCache();
 // Đăng ký các dịch vụ của Identity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
@@ -131,6 +139,8 @@ builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
 builder.Services.AddScoped<IWishlistRepo, WishlistRepo>();
 builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 builder.Services.AddScoped<IShoppingCartRepo, WebShopAPI.Repositories.ShoppingCartRepo>();
+builder.Services.AddScoped<IBannerRepo, BannerRepo>();
+builder.Services.AddScoped<IDiscountRepo, DiscountRepo>();
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 
@@ -143,9 +153,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseSession();
 app.UseHttpsRedirection();
-
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 

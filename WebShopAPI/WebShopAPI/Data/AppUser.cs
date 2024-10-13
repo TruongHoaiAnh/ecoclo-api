@@ -22,5 +22,7 @@ namespace WebShopAPI.Data
         public virtual ICollection<Review> Reviews { get; set; }
         public virtual ICollection<Wishlist> Wishlists { get; set; }
         public virtual ICollection<ShoppingCart> ShoppingCarts { get; set; }
-    }
+        public virtual ICollection<Order> Orders { get; set; }
+
+	}
 }

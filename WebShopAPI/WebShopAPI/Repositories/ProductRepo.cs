@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using WebShopAPI.Data;
 using WebShopAPI.Dtos;
 using WebShopAPI.Helpers;
@@ -23,7 +24,18 @@ namespace WebShopAPI.Repositories
         }
         public async Task<ApiResponse> Create(ProductModel model)
         {
-            if (model == null)
+			var allowedExtensions = new[] { ".gif", ".jpeg", ".jpg", ".tiff", ".png", ".webp", ".bmp" };
+			var formatThumbnai = Path.GetExtension(model.ThumbnailImg.FileName).ToLowerInvariant();
+			if (!allowedExtensions.Contains(formatThumbnai))
+			{
+				return new ApiResponse
+				{
+					Success = false,
+					ErrorCode = "INVALID_IMAGE_FORMAT",
+					Message = $"Invalid image thumbnai file format for file: {model.ThumbnailImg.FileName}. Allowed formats are: {string.Join(", ", allowedExtensions)}"
+				};
+			}
+			if (model == null)
             {
                 return new ApiResponse
                 {
@@ -66,11 +78,28 @@ namespace WebShopAPI.Repositories
             try
             {
                 var idPro = GenerateNextProductId();
+				//Thumbnail
+				var fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + Path.GetFileName(model.ThumbnailImg.FileName);
+				var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Img", "Product");
+				var filePath = Path.Combine(folderPath, fileName);
 
-                var product = new Product
+				if (!Directory.Exists(folderPath))
+				{
+					Directory.CreateDirectory(folderPath);
+				}
+
+				using (var stream = new FileStream(filePath, FileMode.Create))
+				{
+					await model.ThumbnailImg.CopyToAsync(stream);
+				}
+
+
+
+				var product = new Product
                 {
                     IdPro = idPro,
                     IdCate = model.IdCate,
+                    ThumbnailImg = fileName,
                     Name = model.Name,
                     Price = model.Price,
                     ShortDescription = model.ShortDescription,
@@ -80,26 +109,39 @@ namespace WebShopAPI.Repositories
                 };
 
                 await _context.products.AddAsync(product);
-
-                foreach (var proItemModel in model.ProductItems)
+				int countIdProItem = 0;
+				foreach (var proItemModel in model.ProductItems)
                 {
+                    countIdProItem++;
                     var productItem = new ProductItem
                     {
                         IdPro = idPro,
-                        IdProItem = GenerateNextProductItemsId(),
-                        Size = proItemModel.Size,
+                        IdProItem = (countIdProItem < 2) ? GenerateNextProductItemsId() : NextProductItemsIdWithMany(countIdProItem),
+						Size = proItemModel.Size,
                         Color = proItemModel.Color,
                         Quantity = proItemModel.Quantity,
                         StatusProItem = 0
                     };
                     await _context.productItems.AddAsync(productItem);
                 }
-
-                foreach (var imgFile in model.ImgFiles)
+				int countIdImg = 0;
+				foreach (var imgFile in model.ImgFiles)
                 {
-                    var fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + Path.GetFileName(imgFile.FileName);
-                    var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Img", "Product");
-                    var filePath = Path.Combine(folderPath, fileName);
+                    countIdImg++;
+					var formatImgProduct = Path.GetExtension(imgFile.FileName).ToLowerInvariant();
+                    if (!allowedExtensions.Contains(formatImgProduct))
+                    {
+                        return new ApiResponse
+                        {
+                            Success = false,
+                            ErrorCode = "INVALID_IMAGE_FORMAT",
+                            Message = $"Invalid image product file format for file: {imgFile.FileName}. Allowed formats are: {string.Join(", ", allowedExtensions)}"
+
+                        };
+                    }
+					fileName = DateTime.Now.ToString("yyyyMMddHHmmss") + "_" + Path.GetFileName(imgFile.FileName);
+                    folderPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "Img", "Product");
+                    filePath = Path.Combine(folderPath, fileName);
 
                     if (!Directory.Exists(folderPath))
                     {
@@ -113,8 +155,8 @@ namespace WebShopAPI.Repositories
 
                     var imgPro = new ImgPro
                     {
-                        IdImg = GenerateNextIMGId(),
-                        IdPro = idPro,
+						IdImg = (countIdImg < 2) ? GenerateNextIMGId() : NextIMGIdWithMany(countIdImg),
+						IdPro = idPro,
                         LinkImg = fileName
                     };
                     await _context.imgPros.AddAsync(imgPro);
@@ -142,7 +184,7 @@ namespace WebShopAPI.Repositories
         }
         public async Task<List<ProductDto>> GetAll(string? searchString, string? IdCate, float? from, float? to)
         {
-            var query = _context.products.AsQueryable();
+            var query = _context.products.Where(p => p.StatusProduct == 0).AsQueryable();
 
             // Apply filters
             if (!string.IsNullOrEmpty(searchString))
@@ -173,6 +215,7 @@ namespace WebShopAPI.Repositories
                {
                    IdPro = p.IdPro,
                    IdCate = p.IdCate,
+                   ThumbnailImg = p.ThumbnailImg,
                    Name = p.Name,
                    Price = p.Price,
                    ShortDescription = p.ShortDescription,
@@ -454,16 +497,16 @@ namespace WebShopAPI.Repositories
         public string GenerateNextProductItemsId()
         {
             // Retrieve the maximum existing Id_pro
-            string maxIdPro = _context.productItems
+            string maxIdProItem = _context.productItems
                 .Select(p => p.IdProItem)
                 .OrderByDescending(id => id)
                 .FirstOrDefault();
 
             // Generate the next Id_pro
             int nextNumber = 1;
-            if (!string.IsNullOrEmpty(maxIdPro))
+            if (!string.IsNullOrEmpty(maxIdProItem))
             {
-                string numericPart = maxIdPro.Substring(2); 
+                string numericPart = maxIdProItem.Substring(2); 
                 if (int.TryParse(numericPart, out int numericValue))
                 {
                     nextNumber = numericValue + 1;

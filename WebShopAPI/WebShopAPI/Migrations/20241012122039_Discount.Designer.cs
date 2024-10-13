@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebShopAPI.Data;
 
@@ -11,9 +12,11 @@ using WebShopAPI.Data;
 namespace WebShopAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241012122039_Discount")]
+    partial class Discount
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -278,39 +281,6 @@ namespace WebShopAPI.Migrations
                     b.ToTable("categories");
                 });
 
-            modelBuilder.Entity("WebShopAPI.Data.Discount", b =>
-                {
-                    b.Property<string>("IdDiscount")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<float>("DiscountAmount")
-                        .HasColumnType("real");
-
-                    b.Property<DateTime?>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool?>("IsUsed")
-                        .HasColumnType("bit");
-
-                    b.Property<float>("MinimumOrderAmount")
-                        .HasColumnType("real");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdDiscount");
-
-                    b.ToTable("discounts");
-                });
-
             modelBuilder.Entity("WebShopAPI.Data.ImgPro", b =>
                 {
                     b.Property<string>("IdImg")
@@ -473,10 +443,6 @@ namespace WebShopAPI.Migrations
 
                     b.Property<int>("StatusProduct")
                         .HasColumnType("int");
-
-                    b.Property<string>("ThumbnailImg")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");

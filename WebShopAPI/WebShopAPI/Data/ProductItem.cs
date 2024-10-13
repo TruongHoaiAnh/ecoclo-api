@@ -19,6 +19,7 @@ namespace WebShopAPI.Data
         public string IdPro {  get; set; }
         public virtual Product product { get; set; }
         public virtual ICollection<ShoppingCartItem> ShoppingCartItems { get; set; }
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; }
 
     }
 }

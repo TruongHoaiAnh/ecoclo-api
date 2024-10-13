@@ -6,11 +6,10 @@ namespace WebShopAPI.Data
     public class Banner
     {
         [Key]
-        public int IdBanner { get; set; }
+        public string IdBanner { get; set; }
         [Required]
         [StringLength(200)]
-        public string Link { get; set; }
-        [StringLength(450)]
-        public string Text { get; set; }
+        [RegularExpression(@"\.(gif|jpe?g|tiff?|png|webp|bmp)$", ErrorMessage = "Invalid image file format.")]
+        public string LinkImg { get; set; }
     }
 }
