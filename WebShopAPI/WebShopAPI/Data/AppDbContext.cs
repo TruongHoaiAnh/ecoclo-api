@@ -122,16 +122,17 @@ namespace WebShopAPI.Data
             //OrderDetail
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasOne<Order>()
-                    .WithMany(p => p.OrderDetails)
-					.HasForeignKey(d => d.IdOrder)
-					.OnDelete(DeleteBehavior.ClientSetNull)
-					.HasConstraintName("FK_order_detail_order");
-                entity.HasOne<ProductItem>()
-					.WithMany(p => p.OrderDetails)
-					.HasForeignKey(d => d.IdProItem)
-					.OnDelete(DeleteBehavior.ClientSetNull)
-					.HasConstraintName("FK_order_detail_product_item");
+                entity.HasOne(d => d.Order)  
+                    .WithMany(p => p.OrderDetails)  
+                    .HasForeignKey(d => d.IdOrder) 
+                    .OnDelete(DeleteBehavior.ClientSetNull) 
+                    .HasConstraintName("FK_order_detail_order");
+
+                entity.HasOne(d => d.ProductItem)  
+                    .WithMany(p => p.OrderDetails)  
+                    .HasForeignKey(d => d.IdProItem)  
+                    .OnDelete(DeleteBehavior.ClientSetNull) 
+                    .HasConstraintName("FK_order_detail_product_item");
             });
 
 
@@ -139,7 +140,7 @@ namespace WebShopAPI.Data
 
 
 
-			foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 var tableName = entityType.GetTableName();
                 if (tableName.StartsWith("AspNet"))

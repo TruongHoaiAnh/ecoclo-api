@@ -5,32 +5,32 @@
 namespace WebShopAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class updatereview : Migration
+    public partial class UpdateOrderV01 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Comment",
-                table: "reviews",
-                type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "",
+                name: "IdAcc",
+                table: "orders",
+                type: "nvarchar(450)",
+                nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)",
-                oldNullable: true);
+                oldType: "nvarchar(450)");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterColumn<string>(
-                name: "Comment",
-                table: "reviews",
-                type: "nvarchar(max)",
-                nullable: true,
+                name: "IdAcc",
+                table: "orders",
+                type: "nvarchar(450)",
+                nullable: false,
+                defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(max)");
+                oldType: "nvarchar(450)",
+                oldNullable: true);
         }
     }
 }

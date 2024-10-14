@@ -535,6 +535,10 @@ namespace WebShopAPI.Repositories
                     nextNumber = numericValue + count;
                 }
             }
+            else//Khi chưa có sản phẩm proitem nào
+            {
+                nextNumber = count;
+            }
 
             string nextIdPro = $"PI{nextNumber:D3}";
 
@@ -579,6 +583,10 @@ namespace WebShopAPI.Repositories
                 {
                     nextNumber = numericValue + count;
                 }
+            }
+            else//Khi chưa có sản phẩm proitem nào
+            {
+                nextNumber = count;
             }
 
             string nextIdImg = $"IM{nextNumber:D3}";

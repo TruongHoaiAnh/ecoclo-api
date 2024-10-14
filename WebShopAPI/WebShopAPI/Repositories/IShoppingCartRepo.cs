@@ -10,6 +10,6 @@ namespace WebShopAPI.Repositories
         public Task<ApiResponse> AddToCart(string idPro, string idProItem, int quantity, float price);
         public Task<ApiResponse> RemoveFromCart(string idCartItem);
         public Task<ApiResponse> UpdateQuantity(string idProItem, int quantity);
-        public Task<ApiResponse> CheckoutCOD(CheckoutModel models, string methodPayment);
+        public Task<ApiResponse> CheckoutCOD(CheckoutModel model);
     }
 }
