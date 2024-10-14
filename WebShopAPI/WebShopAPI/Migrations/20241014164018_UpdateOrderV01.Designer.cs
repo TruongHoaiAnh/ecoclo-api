@@ -12,8 +12,8 @@ using WebShopAPI.Data;
 namespace WebShopAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240922031416_UpdateFK_User")]
-    partial class UpdateFK_User
+    [Migration("20241014164018_UpdateOrderV01")]
+    partial class UpdateOrderV01
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -170,6 +170,11 @@ namespace WebShopAPI.Migrations
                         .HasMaxLength(400)
                         .HasColumnType("nvarchar");
 
+                    b.Property<string>("Avt")
+                        .IsRequired()
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -244,6 +249,21 @@ namespace WebShopAPI.Migrations
                     b.ToTable("Users", (string)null);
                 });
 
+            modelBuilder.Entity("WebShopAPI.Data.Banner", b =>
+                {
+                    b.Property<string>("IdBanner")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LinkImg")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("IdBanner");
+
+                    b.ToTable("banners");
+                });
+
             modelBuilder.Entity("WebShopAPI.Data.Category", b =>
                 {
                     b.Property<string>("IdCate")
@@ -253,9 +273,45 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("StatusCate")
+                        .HasColumnType("int");
+
                     b.HasKey("IdCate");
 
                     b.ToTable("categories");
+                });
+
+            modelBuilder.Entity("WebShopAPI.Data.Discount", b =>
+                {
+                    b.Property<string>("IdDiscount")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("DiscountAmount")
+                        .HasColumnType("real");
+
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool?>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<float>("MinimumOrderAmount")
+                        .HasColumnType("real");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdDiscount");
+
+                    b.ToTable("discounts");
                 });
 
             modelBuilder.Entity("WebShopAPI.Data.ImgPro", b =>
@@ -276,6 +332,101 @@ namespace WebShopAPI.Migrations
                     b.HasIndex("IdPro");
 
                     b.ToTable("imgPros");
+                });
+
+            modelBuilder.Entity("WebShopAPI.Data.Order", b =>
+                {
+                    b.Property<string>("IdOrder")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Fullname")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("IdAcc")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("OrderEnd")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderInProgress")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("OrderStart")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrderStatus")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("ShippingFee")
+                        .HasColumnType("real");
+
+                    b.Property<string>("ShippingMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdOrder");
+
+                    b.HasIndex("IdAcc");
+
+                    b.ToTable("orders");
+                });
+
+            modelBuilder.Entity("WebShopAPI.Data.OrderDetail", b =>
+                {
+                    b.Property<string>("IdOrderDetail")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float?>("DiscountAmount")
+                        .HasColumnType("real");
+
+                    b.Property<string>("IdOrder")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("IdProItem")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<float>("OrderTotal")
+                        .HasColumnType("real");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("IdOrderDetail");
+
+                    b.HasIndex("IdOrder");
+
+                    b.HasIndex("IdProItem");
+
+                    b.ToTable("orderDetails");
                 });
 
             modelBuilder.Entity("WebShopAPI.Data.Product", b =>
@@ -310,6 +461,10 @@ namespace WebShopAPI.Migrations
 
                     b.Property<int>("StatusProduct")
                         .HasColumnType("int");
+
+                    b.Property<string>("ThumbnailImg")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdateDate")
                         .HasColumnType("datetime2");
@@ -357,7 +512,11 @@ namespace WebShopAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Comment")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Dislike")
+                        .HasColumnType("int");
 
                     b.Property<string>("IdAcc")
                         .IsRequired()
@@ -367,11 +526,17 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double>("RatingValue")
-                        .HasColumnType("float");
+                    b.Property<int?>("Like")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RatingValue")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ReviewDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("statusReview")
+                        .HasColumnType("int");
 
                     b.HasKey("IdReview");
 
@@ -389,9 +554,11 @@ namespace WebShopAPI.Migrations
 
                     b.Property<string>("IdAcc")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("IdCart");
+
+                    b.HasIndex("IdAcc");
 
                     b.ToTable("shoppingCarts");
                 });
@@ -413,7 +580,7 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double?>("Price")
+                    b.Property<double>("Price")
                         .HasColumnType("float");
 
                     b.Property<int>("Quantity")
@@ -515,6 +682,35 @@ namespace WebShopAPI.Migrations
                     b.Navigation("product");
                 });
 
+            modelBuilder.Entity("WebShopAPI.Data.Order", b =>
+                {
+                    b.HasOne("WebShopAPI.Data.AppUser", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("IdAcc")
+                        .HasConstraintName("FK_order_user");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("WebShopAPI.Data.OrderDetail", b =>
+                {
+                    b.HasOne("WebShopAPI.Data.Order", "Order")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("IdOrder")
+                        .IsRequired()
+                        .HasConstraintName("FK_order_detail_order");
+
+                    b.HasOne("WebShopAPI.Data.ProductItem", "ProductItem")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("IdProItem")
+                        .IsRequired()
+                        .HasConstraintName("FK_order_detail_product_item");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("ProductItem");
+                });
+
             modelBuilder.Entity("WebShopAPI.Data.Product", b =>
                 {
                     b.HasOne("WebShopAPI.Data.Category", "Category")
@@ -563,7 +759,7 @@ namespace WebShopAPI.Migrations
                 {
                     b.HasOne("WebShopAPI.Data.AppUser", "User")
                         .WithMany("ShoppingCarts")
-                        .HasForeignKey("IdCart")
+                        .HasForeignKey("IdAcc")
                         .IsRequired()
                         .HasConstraintName("FK_shopping_cart_user");
 
@@ -619,6 +815,8 @@ namespace WebShopAPI.Migrations
 
             modelBuilder.Entity("WebShopAPI.Data.AppUser", b =>
                 {
+                    b.Navigation("Orders");
+
                     b.Navigation("Reviews");
 
                     b.Navigation("ShoppingCarts");
@@ -629,6 +827,11 @@ namespace WebShopAPI.Migrations
             modelBuilder.Entity("WebShopAPI.Data.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("WebShopAPI.Data.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("WebShopAPI.Data.Product", b =>
@@ -646,6 +849,8 @@ namespace WebShopAPI.Migrations
 
             modelBuilder.Entity("WebShopAPI.Data.ProductItem", b =>
                 {
+                    b.Navigation("OrderDetails");
+
                     b.Navigation("ShoppingCartItems");
                 });
 

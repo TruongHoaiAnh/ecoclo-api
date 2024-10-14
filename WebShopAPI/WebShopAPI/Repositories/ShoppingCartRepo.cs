@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
+using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -44,6 +45,7 @@ namespace WebShopAPI.Repositories
 						Quantity = item.Quantity,
 						Price = item.Price,
 						IdPro = item.IdPro,
+						Product = item.Product
 						// Map other properties as needed
 					}).ToList();
 
@@ -558,64 +560,298 @@ namespace WebShopAPI.Repositories
 				}
 			}
 
-			string nextIdAcc = $"OR{nextNumber:D3}"; // Format the new Id_acc
+			string nextIdOrder = $"OR{nextNumber:D3}"; // Format the new Id_acc
 
-			return nextIdAcc;
+			return nextIdOrder;
+		}
+
+		public string GenerateNextOrderDetailId()
+		{
+			// Retrieve the maximum existing Id_pro
+			string maxIdOrderDetail = _context.orderDetails
+				.Select(p => p.IdOrderDetail)
+				.OrderByDescending(id => id)
+				.FirstOrDefault();
+
+			int nextNumber = 1;
+			if (!string.IsNullOrEmpty(maxIdOrderDetail))
+			{
+				string numericPart = maxIdOrderDetail.Substring(2); 
+				if (int.TryParse(numericPart, out int numericValue))
+				{
+					nextNumber = numericValue + 1;
+				}
+			}
+
+			string nextIdOrderDetail = $"OD{nextNumber:D3}"; 
+
+			return nextIdOrderDetail;
 		}
 
 
-		public Task<ApiResponse> CheckoutCOD(CheckoutModel models, string methodPayment)
+        // public async Task<ApiResponse> CheckoutCOD(CheckoutModel model)
+        // {
+        //     if (model == null)
+        //     {
+        //         return new ApiResponse { Success = false, Message = "Invalid request data" };
+        //     }
+
+        //     var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+
+        //     if (model.paymentMethod == "Bank")
+        //     {
+        //         return new ApiResponse { Success = false, Message = "Method payment is bank" };
+        //     }
+
+        //     var cart = _context.shoppingCarts.Include(c => c.ShoppingCartItems)
+        //                                      .FirstOrDefault(c => c.IdAcc == user.Id);
+        //     if (cart == null)
+        //     {
+        //         return new ApiResponse { Success = false, Message = "Cart is empty" };
+        //     }
+
+        //     var shopCartItems = _context.shoppingCartItems.Where(item => item.IdCart == cart.IdCart)
+        //                                                   .ToList();
+
+        //     if (!shopCartItems.Any())
+        //     {
+        //         return new ApiResponse { Success = false, Message = "No items in cart" };
+        //     }
+
+        //     float orderTotal = (float)shopCartItems.Sum(item => item.Quantity * item.Price);
+        //     Discount discount = null;
+
+        //     // Handle discount code
+        //     if (!string.IsNullOrEmpty(model.DiscountCode))
+        //     {
+        //         discount = _context.discounts.FirstOrDefault(d => d.Code == model.DiscountCode && d.Status == 0);
+        //         if (discount == null)
+        //         {
+        //             return new ApiResponse { Success = false, Message = "Invalid discount code" };
+        //         }
+
+        //         if (discount.ExpiryDate.HasValue && discount.ExpiryDate.Value < DateTime.Now)
+        //         {
+        //             return new ApiResponse { Success = false, Message = "Discount code has expired" };
+        //         }
+
+        //         // Apply percentage or fixed discount
+        //         if (discount.DiscountAmount <= 1) // Percentage-based discount
+        //         {
+        //             orderTotal -= orderTotal * discount.DiscountAmount;
+        //         }
+        //         else // Fixed amount discount
+        //         {
+        //             orderTotal -= discount.DiscountAmount;
+        //         }
+
+        //         // Ensure order total doesn't go negative
+        //         orderTotal = Math.Max(orderTotal, 0);
+        //     }
+
+        //     using (var transaction = await _context.Database.BeginTransactionAsync())
+        //     {
+        //         try
+        //         {
+        //             var order = new Order
+        //             {
+        //                 IdOrder = GenerateNextOrderId(),
+        //                 IdAcc = user.Id,
+        //                 Fullname = model.FullName,
+        //                 Email = model.Email,
+        //                 Phone = model.Phone,
+        //                 Address = model.Address,
+        //                 Note = model.Note,
+        //                 OrderDate = DateTime.Now,
+        //                 PaymentMethod = model.paymentMethod,
+        //                 ShippingMethod = model.shippingMethod,
+        //                 OrderStatus = 0,
+        //                 OrderDetails = new List<OrderDetail>()
+        //             };
+
+        //             foreach (var item in cart.ShoppingCartItems)
+        //             {
+        //                 var orderItem = new OrderDetail
+        //                 {
+        //                     IdOrderDetail = GenerateNextOrderDetailId(),
+        //                     IdOrder = order.IdOrder,
+        //                     IdProItem = item.IdProItem,
+        //                     Quantity = item.Quantity,
+        //                     Price = item.Price,
+        //OrderTotal = orderTotal,
+        //                     DiscountAmount = discount?.DiscountAmount ?? 0,
+        //                 };
+        //                 order.OrderDetails.Add(orderItem);
+        //             }
+
+        //             _context.orders.Add(order);
+        //             _context.shoppingCarts.Remove(cart);
+        //             _context.shoppingCartItems.RemoveRange(cart.ShoppingCartItems);
+
+        //             await _context.SaveChangesAsync();
+        //             await transaction.CommitAsync();
+
+        //             return new ApiResponse { Success = true, Message = "Checkout successfully" };
+        //         }
+        //         catch (Exception ex)
+        //         {
+        //             await transaction.RollbackAsync();
+        //             return new ApiResponse { Success = false, Message = $"Checkout failed: {ex.Message}" };
+        //         }
+        //     }
+        // }
+
+        public async Task<ApiResponse> CheckoutCOD(CheckoutModel model)
         {
-            /*if (models != null)
+            if (model == null)
             {
-                var user = _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User).Result;
-                if (user != null)
+                return new ApiResponse { Success = false, Message = "Invalid request data" };
+            }
+
+            var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
+            ShoppingCart cart = null;
+
+
+			if(user != null)
+			{
+                // Lấy giỏ hàng theo userId
+                cart = _context.shoppingCarts.Include(c => c.ShoppingCartItems)
+                                             .FirstOrDefault(c => c.IdAcc == user.Id);
+                if (cart == null)
                 {
-                    if (methodPayment == "Bank")
+                    return new ApiResponse { Success = false, Message = "Cart is empty" };
+                }
+            }
+			else
+			{
+                // Người dùng không đăng nhập, lấy giỏ hàng từ Session
+				_httpContextAccessor.HttpContext.Session.TryGetValue("ShoppingCart", out var existingCartData);
+                var cartDataString = Encoding.UTF8.GetString(existingCartData);
+                // Deserialize giỏ hàng từ session
+                cart = JsonSerializer.Deserialize<ShoppingCart>(cartDataString, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    ReferenceHandler = ReferenceHandler.Preserve
+                });
+                
+                if (cart == null && cart.ShoppingCartItems == null)
+                {
+                    return new ApiResponse { Success = false, Message = "No items in cart" };
+                }
+            }
+
+
+            if (model.paymentMethod == "Bank")
+            {
+                return new ApiResponse { Success = false, Message = "Method payment is bank" };
+            }
+
+
+
+            /*var shopCartItems = _context.shoppingCartItems.Where(item => item.IdCart == cart.IdCart)
+                                                          .ToList();
+
+            if (!shopCartItems.Any())
+            {
+                return new ApiResponse { Success = false, Message = "No items in cart" };
+            }*/
+
+            // Tính tổng tiền đơn hàng
+            float orderTotal = (float)cart.ShoppingCartItems.Sum(item => item.Quantity * item.Price);
+            Discount discount = null;
+
+            // Handle discount code
+            if (!string.IsNullOrEmpty(model.DiscountCode))
+            {
+                discount = _context.discounts.FirstOrDefault(d => d.Code == model.DiscountCode && d.Status == 0);
+                if (discount == null)
+                {
+                    return new ApiResponse { Success = false, Message = "Invalid discount code" };
+                }
+
+                if (discount.ExpiryDate.HasValue && discount.ExpiryDate.Value < DateTime.Now)
+                {
+                    return new ApiResponse { Success = false, Message = "Discount code has expired" };
+                }
+
+				if (orderTotal < discount.MinimumOrderAmount)
+				{
+                    return new ApiResponse { Success = false, Message = "Discount not applicable to this product" };
+                }
+
+                // Apply percentage or fixed discount
+                if (discount.DiscountAmount <= 1) // Percentage-based discount
+                {
+                    orderTotal -= orderTotal * discount.DiscountAmount;
+                }
+                else // Fixed amount discount
+                {
+                    orderTotal -= discount.DiscountAmount;
+                }
+
+                // Ensure order total doesn't go negative
+                orderTotal = Math.Max(orderTotal, 0);
+            }
+
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var order = new Order
                     {
-                        return Task.FromResult(new ApiResponse { Success = false, Message = "Method payment is bank" });
-                    }
-                    var cart = _context.shoppingCarts.Include(c => c.ShoppingCartItems).FirstOrDefault(c => c.IdAcc == user.Id);
-                    if (cart != null)
+                        IdOrder = GenerateNextOrderId(),
+                        IdAcc = user?.Id,  // Nếu người dùng không đăng nhập, để trống IdAcc
+                        Fullname = model.FullName,
+                        Email = model.Email,
+                        Phone = model.Phone,
+                        Address = model.Address,
+                        Note = model.Note,
+                        OrderDate = DateTime.Now,
+                        PaymentMethod = model.paymentMethod,
+                        ShippingMethod = model.shippingMethod,
+                        OrderStatus = 0,
+                        OrderDetails = new List<OrderDetail>()
+                    };
+
+                    foreach (var item in cart.ShoppingCartItems)
                     {
-                        var order = new Order
+                        var orderItem = new OrderDetail
                         {
-                            IdOrder = GenerateNextOrderId(),
-                            IdAcc = user.Id,
-							Fullname = models.FullName,
-                            Email = models.Email,
-                            Phone = models.Phone,
-                            Address = models.Address,
-                            Note = models.Note,
-                            OrderDate = DateTime.Now,
-                            OrderStatus = 0,
+                            IdOrderDetail = GenerateNextOrderDetailId(),
+                            IdOrder = order.IdOrder,
+                            IdProItem = item.IdProItem,
+                            Quantity = item.Quantity,
+                            Price = item.Price,
+                            OrderTotal = orderTotal,
+                            DiscountAmount = discount?.DiscountAmount ?? 0,
                         };
+                        order.OrderDetails.Add(orderItem);
+                    }
 
-                        foreach (var item in cart.ShoppingCartItems)
-                        {
-                            var orderItem = new OrderItem
-                            {
-                                IdOrderItem = GenerateNextOrderItemId(),
-                                IdOrder = order.IdOrder,
-                                IdProItem = item.IdProItem,
-                                Quantity = item.Quantity,
-                                Price = item.Price
-                            };
-                            order.OrderItems.Add(orderItem);
-                        }
-
-                        _context.orders.Add(order);
+                    _context.orders.Add(order);
+                    if (user != null)
+                    {
                         _context.shoppingCarts.Remove(cart);
                         _context.shoppingCartItems.RemoveRange(cart.ShoppingCartItems);
-                        _context.SaveChanges();
-
-                        return Task.FromResult(new ApiResponse { Success = true, Message = "Checkout successfully" });
                     }
-                    return Task.FromResult(new ApiResponse { Success = false, Message = "Cart is empty" });
+                    else
+                    {
+                        // Xóa giỏ hàng khỏi session
+                        _httpContextAccessor.HttpContext.Session.Remove("ShoppingCart");
+                    }
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return new ApiResponse { Success = true, Message = "Checkout successfully" };
                 }
-                return Task.FromResult(new ApiResponse { Success = false, Message = "User is not login" });
-            }*/
-            throw new NotImplementedException();
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return new ApiResponse { Success = false, Message = $"Checkout failed: {ex.Message}" };
+                }
+            }
         }
-	}
+
+    }
 }

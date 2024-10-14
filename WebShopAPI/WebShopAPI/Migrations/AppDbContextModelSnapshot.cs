@@ -349,7 +349,6 @@ namespace WebShopAPI.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdAcc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Note")
@@ -371,13 +370,7 @@ namespace WebShopAPI.Migrations
                     b.Property<int>("OrderStatus")
                         .HasColumnType("int");
 
-                    b.Property<double>("OrderTotal")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("OrderTotalDiscount")
-                        .HasColumnType("float");
-
-                    b.Property<string>("PaymentMethodId")
+                    b.Property<string>("PaymentMethod")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -387,6 +380,10 @@ namespace WebShopAPI.Migrations
 
                     b.Property<float>("ShippingFee")
                         .HasColumnType("real");
+
+                    b.Property<string>("ShippingMethod")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("IdOrder");
 
@@ -400,6 +397,9 @@ namespace WebShopAPI.Migrations
                     b.Property<string>("IdOrderDetail")
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<float?>("DiscountAmount")
+                        .HasColumnType("real");
+
                     b.Property<string>("IdOrder")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
@@ -408,24 +408,13 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("OrderIdOrder")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<double>("OrderTotal")
-                        .HasColumnType("float");
+                    b.Property<float>("OrderTotal")
+                        .HasColumnType("real");
 
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
-                    b.Property<string>("ProductItemIdProItem")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("Review")
                         .HasColumnType("int");
 
                     b.HasKey("IdOrderDetail");
@@ -433,10 +422,6 @@ namespace WebShopAPI.Migrations
                     b.HasIndex("IdOrder");
 
                     b.HasIndex("IdProItem");
-
-                    b.HasIndex("OrderIdOrder");
-
-                    b.HasIndex("ProductItemIdProItem");
 
                     b.ToTable("orderDetails");
                 });
@@ -592,7 +577,7 @@ namespace WebShopAPI.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double?>("Price")
+                    b.Property<double>("Price")
                         .HasColumnType("float");
 
                     b.Property<int>("Quantity")
@@ -699,7 +684,6 @@ namespace WebShopAPI.Migrations
                     b.HasOne("WebShopAPI.Data.AppUser", "User")
                         .WithMany("Orders")
                         .HasForeignKey("IdAcc")
-                        .IsRequired()
                         .HasConstraintName("FK_order_user");
 
                     b.Navigation("User");
@@ -707,29 +691,17 @@ namespace WebShopAPI.Migrations
 
             modelBuilder.Entity("WebShopAPI.Data.OrderDetail", b =>
                 {
-                    b.HasOne("WebShopAPI.Data.Order", null)
+                    b.HasOne("WebShopAPI.Data.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("IdOrder")
                         .IsRequired()
                         .HasConstraintName("FK_order_detail_order");
 
-                    b.HasOne("WebShopAPI.Data.ProductItem", null)
+                    b.HasOne("WebShopAPI.Data.ProductItem", "ProductItem")
                         .WithMany("OrderDetails")
                         .HasForeignKey("IdProItem")
                         .IsRequired()
                         .HasConstraintName("FK_order_detail_product_item");
-
-                    b.HasOne("WebShopAPI.Data.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderIdOrder")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("WebShopAPI.Data.ProductItem", "ProductItem")
-                        .WithMany()
-                        .HasForeignKey("ProductItemIdProItem")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
 
                     b.Navigation("Order");
 

@@ -10,6 +10,9 @@ namespace WebShopAPI.Models
 		[Phone]
 		public string Phone { get; set; }
 		public string Address { get; set; }
+		public string shippingMethod { get; set; }
+		public string paymentMethod { get; set; }
 		public string Note { get; set; }
+		public string? DiscountCode { get; set; }
 	}
 }

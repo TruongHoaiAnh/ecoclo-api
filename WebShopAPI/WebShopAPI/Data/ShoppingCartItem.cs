@@ -11,7 +11,7 @@ namespace WebShopAPI.Data
         [Required]
         public string IdProItem { get; set; }
         public int Quantity { get; set; }
-        public double? Price { get; set; }
+        public double Price { get; set; }
         public string IdPro { get; set; }
 
         public virtual ShoppingCart ShoppingCart { get; set; }

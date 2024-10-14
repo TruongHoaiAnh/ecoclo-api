@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using WebShopAPI.Helpers;
+using WebShopAPI.Models;
 using WebShopAPI.Repositories;
 
 namespace WebShopAPI.Controllers
@@ -52,6 +53,20 @@ namespace WebShopAPI.Controllers
         public async Task<IActionResult> Remove(string idCartItem)
         {
             var result = await _shoppingCart.RemoveFromCart(idCartItem);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
+        [HttpPost("Checkout")]
+        public async Task<IActionResult> Checkout([FromBody]CheckoutModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var result = await _shoppingCart.CheckoutCOD(model);
             if (result.Success)
             {
                 return Ok(result);
