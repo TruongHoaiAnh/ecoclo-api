@@ -73,5 +73,16 @@ namespace WebShopAPI.Controllers
             }
             return BadRequest(result);
         }
+
+        [HttpGet("CheckoutInfo")]
+        public async Task<IActionResult> GetCheckoutInfo()
+        {
+            var result = await _shoppingCart.GetCheckoutInfo();
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return BadRequest(result);
+        }
     }
 }

@@ -286,8 +286,9 @@ namespace WebShopAPI.Repositories
 					// Add the new item to the cart
 					cart.ShoppingCartItems.Add(newItem);
 				}
+                
 
-				if (user == null)
+                if (user == null)
 				{
 					var shoppingCartDto = new ShoppingCartDto
 					{
@@ -707,6 +708,15 @@ namespace WebShopAPI.Repositories
             {
                 return new ApiResponse { Success = false, Message = "Invalid request data" };
             }
+			float shippingFee = 0;
+			if(model.shippingMethod == "GHTK")
+			{
+                shippingFee = 35000;
+
+            } else if (model.shippingMethod == "GHN")
+            {
+                shippingFee = 40000;
+            }
 
             var user = await _userManager.GetUserAsync(_httpContextAccessor.HttpContext.User);
             ShoppingCart cart = null;
@@ -757,7 +767,7 @@ namespace WebShopAPI.Repositories
             }*/
 
             // Tính tổng tiền đơn hàng
-            float orderTotal = (float)cart.ShoppingCartItems.Sum(item => item.Quantity * item.Price);
+            float orderTotal = (float)cart.ShoppingCartItems.Sum(item => item.Quantity * item.Price) - shippingFee;
             Discount discount = null;
 
             // Handle discount code
@@ -810,11 +820,27 @@ namespace WebShopAPI.Repositories
                         PaymentMethod = model.paymentMethod,
                         ShippingMethod = model.shippingMethod,
                         OrderStatus = 0,
+                        OrderTotal = orderTotal,
                         OrderDetails = new List<OrderDetail>()
                     };
 
                     foreach (var item in cart.ShoppingCartItems)
                     {
+                        var productItem = await _context.productItems.FirstOrDefaultAsync(p => p.IdProItem == item.IdProItem);
+
+                        if (productItem == null)
+                        {
+                            return new ApiResponse { Success = false, Message = $"Product item {item.IdProItem} does not exist" };
+                        }
+
+                        if (productItem.Quantity < item.Quantity)
+                        {
+                            return new ApiResponse { Success = false, Message = $"Not enough stock for product {productItem.IdProItem}" };
+                        }
+
+                        // Deduct stock
+                        productItem.Quantity -= item.Quantity;
+
                         var orderItem = new OrderDetail
                         {
                             IdOrderDetail = GenerateNextOrderDetailId(),
@@ -822,7 +848,6 @@ namespace WebShopAPI.Repositories
                             IdProItem = item.IdProItem,
                             Quantity = item.Quantity,
                             Price = item.Price,
-                            OrderTotal = orderTotal,
                             DiscountAmount = discount?.DiscountAmount ?? 0,
                         };
                         order.OrderDetails.Add(orderItem);
@@ -841,8 +866,17 @@ namespace WebShopAPI.Repositories
                     }
 
                     await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
+                    // Lưu thông tin đơn hàng vào session
+                    var options = new JsonSerializerOptions
+                    {
+                        ReferenceHandler = ReferenceHandler.Preserve, // Dùng ReferenceHandler.Preserve để hỗ trợ tuần tự hóa với vòng lặp
+                        WriteIndented = true // Tùy chọn này để có định dạng JSON đẹp hơn, có thể bỏ qua nếu không cần
+                    };
 
+                    var orderJson = JsonSerializer.Serialize(order, options);
+                    _httpContextAccessor.HttpContext.Session.SetString("Order", orderJson);
+
+                    await transaction.CommitAsync();
                     return new ApiResponse { Success = true, Message = "Checkout successfully" };
                 }
                 catch (Exception ex)
@@ -853,5 +887,36 @@ namespace WebShopAPI.Repositories
             }
         }
 
+        public async Task<ApiResponse> GetCheckoutInfo()
+        {
+            var orderJson = _httpContextAccessor.HttpContext.Session.GetString("Order");
+            if (string.IsNullOrEmpty(orderJson))
+            {
+                return new ApiResponse { Success = false, Message = "No order information found in session." };
+            }
+
+			// Deserialize chuỗi JSON thành đối tượng Order
+			var options = new JsonSerializerOptions
+			{
+				PropertyNameCaseInsensitive = true,
+				ReferenceHandler = ReferenceHandler.Preserve // Giữ lại thông tin tham chiếu nếu có
+			};
+            var order = JsonSerializer.Deserialize<Order>(orderJson, options);
+            // Tìm các chi tiết đơn hàng từ cơ sở dữ liệu (nếu cần)
+            var orderDetails = await _context.orderDetails
+                                              .Where(od => od.IdOrder == order.IdOrder)
+                                              .ToListAsync();
+
+            return new ApiResponse
+            {
+                Success = true,
+                Data = new
+                {
+                    Order = order,
+                    OrderDetails = orderDetails
+                },
+                Message = "Order information retrieved successfully."
+            };
+        }
     }
 }
