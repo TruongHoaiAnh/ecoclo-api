@@ -141,6 +141,7 @@ builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
 builder.Services.AddScoped<IShoppingCartRepo, WebShopAPI.Repositories.ShoppingCartRepo>();
 builder.Services.AddScoped<IBannerRepo, BannerRepo>();
 builder.Services.AddScoped<IDiscountRepo, DiscountRepo>();
+builder.Services.AddScoped<IOrderRepo, OrderRepo>();
 builder.Services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
 

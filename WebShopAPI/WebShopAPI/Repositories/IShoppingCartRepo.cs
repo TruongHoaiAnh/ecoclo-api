@@ -11,5 +11,6 @@ namespace WebShopAPI.Repositories
         public Task<ApiResponse> RemoveFromCart(string idCartItem);
         public Task<ApiResponse> UpdateQuantity(string idProItem, int quantity);
         public Task<ApiResponse> CheckoutCOD(CheckoutModel model);
+        public Task<ApiResponse> GetCheckoutInfo();
     }
 }

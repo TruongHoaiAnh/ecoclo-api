@@ -16,7 +16,8 @@ namespace WebShopAPI.Data
 		public string PaymentMethod { get; set; }//COD, Bank
 		public string ShippingMethod { get; set; }//GHN, GHTK
 		public string Address { get; set; }
-		public int OrderStatus { get; set; }
+        public float OrderTotal { get; set; }
+        public int OrderStatus { get; set; }
 		public int? OrderStart { get; set; }
 		public int? OrderInProgress { get; set; }
 		public int? OrderEnd { get; set; }
