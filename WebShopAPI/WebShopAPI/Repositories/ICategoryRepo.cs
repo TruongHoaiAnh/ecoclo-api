@@ -10,6 +10,6 @@ namespace WebShopAPI.Repositories
         public Task<Category> GetById(string id);
         public Task<ApiResponse> Create(CategoryModel model);
         public Task<ApiResponse> Update(CategoryModel model, string id);
-        public Task DeleteById(string id);
+        public Task<ApiResponse> DeleteById(string id);
     }
 }
