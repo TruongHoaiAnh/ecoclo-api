@@ -39,16 +39,31 @@ namespace WebShopAPI.Repositories
 
         }
 
-        public async Task DeleteById(string id)
+        public async Task<ApiResponse> DeleteById(string id)
         {
-            var cate = _context.categories.FirstOrDefault(c => c.IdCate == id);
+            var cate = await GetById(id);
             //xóa product có category đã xóa 
-            foreach(var p in cate.Products)
+            if(cate != null)
             {
-                p.StatusProduct = 1;
-            }
-            cate.StatusCate = 1;
-            await _context.SaveChangesAsync();
+				foreach (var p in cate.Products)
+				{
+					p.StatusProduct = 1;
+				}
+				cate.StatusCate = 1;
+				await _context.SaveChangesAsync();
+                return new ApiResponse
+				{
+					Success = true,
+					Message = "Delete successfully",
+				};
+			}
+            return new ApiResponse
+			{
+				Success = false,
+                ErrorCode = "404",
+				Message = "Category not found."
+			};
+            
         }
 
         public async Task<List<Category>> GetAll()
@@ -61,7 +76,12 @@ namespace WebShopAPI.Repositories
         {
             var cate = await _context.categories
                .Where(x => x.StatusCate == 0 && x.IdCate == id) // Add the condition to filter by Id
+               .Include(c => c.Products)
                .FirstOrDefaultAsync();
+            if(cate == null)
+            {
+                return null;
+            }
             return cate;
         }
 

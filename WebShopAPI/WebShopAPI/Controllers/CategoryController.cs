@@ -77,23 +77,12 @@ namespace WebShopAPI.Controllers
         [Authorize(Roles = AppRole.Administrator)]
         public async Task<IActionResult> Delete(string id)
         {
-            var category = await _categoryRepo.GetById(id);
-            if (category == null)
+            var category = await _categoryRepo.DeleteById(id);
+            if (category.Success)
             {
-                return NotFound(new ApiResponse
-                {
-                    Success = false,
-                    ErrorCode = "NOT_FOUND",
-                    Message = "Category not found."
-                });
+                return Ok(category);
             }
-
-            await _categoryRepo.DeleteById(id);
-            return Ok(new ApiResponse
-            {
-                Success = true,
-                Message = "Category deleted successfully."
-            });
+            return BadRequest(category);
         }
 
     }
