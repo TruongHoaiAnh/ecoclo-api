@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using WebShopAPI.Data;
 using WebShopAPI.Dtos;
 using WebShopAPI.Helpers;
+using WebShopAPI.Migrations;
 using WebShopAPI.Models;
 
 namespace WebShopAPI.Repositories
@@ -819,7 +820,9 @@ namespace WebShopAPI.Repositories
                         OrderDate = DateTime.Now,
                         PaymentMethod = model.paymentMethod,
                         ShippingMethod = model.shippingMethod,
-                        OrderStatus = 0,
+						OrderInProgress = Utils.Constant.OrderStatus.Pending,
+						PendingAt = DateTime.Now,
+                        Status = 0,
                         OrderTotal = orderTotal,
                         OrderDetails = new List<OrderDetail>()
                     };

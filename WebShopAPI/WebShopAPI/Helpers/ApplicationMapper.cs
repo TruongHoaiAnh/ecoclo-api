@@ -16,6 +16,14 @@ namespace WebShopAPI.Helpers
             CreateMap<ProductItem, ProductItemDto>().ReverseMap();
             CreateMap<ImgPro, ImgProDto>().ReverseMap();
             CreateMap<Review, ReviewDto>().ReverseMap();
-        }
+            CreateMap<Order, OrderDto>()
+				.ForMember(dest => dest.IdOrder, opt => opt.MapFrom(src => src.IdOrder))
+                .ReverseMap();
+			CreateMap<OrderDetail, OrderDetailDto>().ReverseMap()
+				.ForMember(dest => dest.IdProItem, opt => opt.MapFrom(src => src.IdProItem))
+				.ReverseMap();
+            
+
+		}
     }
 }

@@ -2,6 +2,15 @@
 {
     public class Constant
     {
+
+        public enum OrderStatus
+		{
+			Pending,
+			Processed,
+			Shipping,
+            Done,
+			Cancel
+		}
         public enum StatusUser
         {
             unBlock = 0,
